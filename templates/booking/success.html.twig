@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réservation confirmée — Peaky Barber{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .success-wrapper {
+        max-width: 640px;
+        margin: 80px auto;
+        padding: 0 24px;
+        text-align: center;
+    }
+    .success-icon {
+        font-size: 64px;
+        margin-bottom: 24px;
+    }
+    .success-tag {
+        font-size: 11px;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 12px;
+    }
+    .success-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 52px;
+        color: var(--light);
+        margin-bottom: 16px;
+    }
+    .success-sub {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 48px;
+    }
+    .recap-card {
+        background: var(--grey);
+        border: 1px solid #222;
+        border-left: 3px solid var(--gold);
+        padding: 32px 36px;
+        text-align: left;
+        margin-bottom: 40px;
+    }
+    .recap-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #1e1e1e;
+        font-size: 14px;
+    }
+    .recap-row:last-child { border-bottom: none; }
+    .recap-label {
+        color: #555;
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    .recap-value { color: var(--light); font-weight: 400; }
+    .recap-value.gold { color: var(--gold); }
+    .success-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="success-wrapper">
+    <div class="success-icon">✓</div>
+    <p class="success-tag">✦ Réservation enregistrée</p>
+    <h1 class="success-title">À bientôt !</h1>
+    <p class="success-sub">
+        Votre rendez-vous a bien été confirmé.<br>
+        Un email de confirmation a été envoyé à <strong style="color:var(--gold)">{{ appointment.clientEmail }}</strong>.
+    </p>
+
+    <div class="recap-card">
+        <div class="recap-row">
+            <span class="recap-label">Client</span>
+            <span class="recap-value">{{ appointment.clientName }}</span>
+        </div>
+        <div class="recap-row">
+            <span class="recap-label">Service</span>
+            <span class="recap-value gold">{{ appointment.service.name }}</span>
+        </div>
+        <div class="recap-row">
+            <span class="recap-label">Coiffeur</span>
+            <span class="recap-value">{{ appointment.barber.name }}</span>
+        </div>
+        <div class="recap-row">
+            <span class="recap-label">Date & Heure</span>
+            <span class="recap-value gold">{{ appointment.appointmentAt|date('d/m/Y à H:i') }}</span>
+        </div>
+        <div class="recap-row">
+            <span class="recap-label">Durée</span>
+            <span class="recap-value">{{ appointment.service.duration }} minutes</span>
+        </div>
+        <div class="recap-row">
+            <span class="recap-label">Prix</span>
+            <span class="recap-value">{{ appointment.service.priceFormatted }}</span>
+        </div>
+        {% if appointment.clientPhone %}
+        <div class="recap-row">
+            <span class="recap-label">Téléphone</span>
+            <span class="recap-value">{{ appointment.clientPhone }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="success-actions">
+        <a href="{{ path('home') }}" class="btn btn-outline">← Retour à l'accueil</a>
+        <a href="{{ path('booking_new') }}" class="btn">Nouveau rendez-vous</a>
+    </div>
+</div>
+{% endblock %}
