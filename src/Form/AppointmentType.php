@@ -68,7 +68,8 @@ class AppointmentType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Appointment::class,
+            'data_class'      => Appointment::class,
+            'csrf_protection' => false,
         ]);
     }
 }

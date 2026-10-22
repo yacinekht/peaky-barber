@@ -65,6 +65,15 @@
         .form-group select:focus { border-color: var(--gold); }
         .form-group select option { background: #111; }
         .form-errors { color: #ff6b6b; font-size: 12px; margin-top: 4px; }
+        .form-errors ul { list-style: none; margin: 0; padding: 0; }
+        .form-global-errors {
+            color: #ff6b6b;
+            font-size: 14px;
+            border: 1px solid #ff6b6b;
+            padding: 14px 16px;
+            margin-bottom: 28px;
+        }
+        .form-global-errors ul { list-style: none; margin: 0; padding: 0; }
         .form-submit { margin-top: 36px; }
 
         @media (max-width: 600px) {
@@ -81,6 +90,12 @@
         <p class="booking-subtitle">Réservez en quelques secondes. Confirmation immédiate.</p>
 
         {{ form_start(form, {'attr': {'class': 'booking-form', 'novalidate': 'novalidate'}}) }}
+
+        {% if form.vars.errors|length %}
+            <div class="form-global-errors">
+                {{ form_errors(form) }}
+            </div>
+        {% endif %}
 
         <div class="form-section">
             <div class="form-section-title">01 — Votre choix</div>
@@ -124,6 +139,7 @@
             <div class="form-group" style="max-width:300px">
                 {{ form_label(form.clientPhone) }}
                 {{ form_widget(form.clientPhone) }}
+                <div class="form-errors">{{ form_errors(form.clientPhone) }}</div>
             </div>
         </div>
 
