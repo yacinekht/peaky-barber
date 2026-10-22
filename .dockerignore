@@ -1,5 +1,7 @@
 .git
-var/
-vendor/
-node_modules/
 .env.local
+.env.*.local
+node_modules
+tests
+var
+vendor
