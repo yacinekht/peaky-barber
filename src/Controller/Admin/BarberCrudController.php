@@ -13,7 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Component\HttpFoundation\Response;
 
 class BarberCrudController extends AbstractCrudController
 {
@@ -33,25 +32,25 @@ class BarberCrudController extends AbstractCrudController
         EntityManagerInterface $entityManager,
                                $entityInstance
     ): void {
-        try {
-            parent::updateEntity($entityManager, $entityInstance);
-        } catch (\Throwable $e) {
-            die(
-                '<pre>' .
-                get_class($e) . "\n\n" .
-                $e->getMessage() . "\n\n" .
-                $e->getTraceAsString() .
-                '</pre>'
-            );
-        }
+        $conn = $entityManager->getConnection();
+
+        die(
+            '<h1>TEST TRANSACTION</h1>
+            <p>Transaction active : <strong>' .
+            ($conn->isTransactionActive() ? 'OUI' : 'NON') .
+            '</strong></p>'
+        );
     }
 
     public function configureFields(string $pageName): iterable
     {
         return [
             TextField::new('name', 'Nom'),
+
             TextField::new('speciality', 'Spécialité'),
-            TextareaField::new('bio', 'Biographie')->hideOnIndex(),
+
+            TextareaField::new('bio', 'Biographie')
+                ->hideOnIndex(),
 
             ImageField::new('photo', 'Photo')
                 ->setBasePath('/uploads/barbers')
