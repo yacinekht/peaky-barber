@@ -48,7 +48,7 @@ class BookingController extends AbstractController
             // Envoi email de confirmation
             try {
                 $email = (new Email())
-                    ->from('noreply@peakybarber.fr')
+                    ->from('peakybarberkhaled@gmail.com')
                     ->to($appointment->getClientEmail())
                     ->subject('Confirmation de votre réservation — Peaky Barber')
                     ->html($this->renderView('email/confirmation.html.twig', [
