@@ -41,17 +41,21 @@ class DashboardController extends AbstractDashboardController
     #[Route('/test-update', name: 'test_update')]
     public function testUpdate(EntityManagerInterface $em): Response
     {
-        $service = $em->getRepository(Service::class)->find(1);
+        try {
+            $service = $em->getRepository(Service::class)->find(1);
 
-        if (!$service) {
-            return new Response('Service ID 1 introuvable');
+            $service->setName('TEST ' . time());
+
+            $em->flush();
+
+            return new Response('OK');
+        } catch (\Throwable $e) {
+            return new Response(
+                get_class($e) . "\n\n" .
+                $e->getMessage() . "\n\n" .
+                $e->getTraceAsString()
+            );
         }
-
-        $service->setName('TEST ' . time());
-
-        $em->flush();
-
-        return new Response('OK');
     }
 
     public function configureDashboard(): Dashboard
