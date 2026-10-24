@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Barber;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -26,20 +25,6 @@ class BarberCrudController extends AbstractCrudController
         return $crud
             ->setEntityLabelInSingular('Coiffeur')
             ->setEntityLabelInPlural('Coiffeurs');
-    }
-
-    public function updateEntity(
-        EntityManagerInterface $entityManager,
-                               $entityInstance
-    ): void {
-        $conn = $entityManager->getConnection();
-
-        die(
-            '<h1>TEST TRANSACTION</h1>
-            <p>Transaction active : <strong>' .
-            ($conn->isTransactionActive() ? 'OUI' : 'NON') .
-            '</strong></p>'
-        );
     }
 
     public function configureFields(string $pageName): iterable

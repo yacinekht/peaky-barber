@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Service;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -26,23 +25,6 @@ class ServiceCrudController extends AbstractCrudController
         return $crud
             ->setEntityLabelInSingular('Service')
             ->setEntityLabelInPlural('Services & Prix');
-    }
-
-    public function updateEntity(
-        EntityManagerInterface $entityManager,
-                               $entityInstance
-    ): void {
-        try {
-            parent::updateEntity($entityManager, $entityInstance);
-        } catch (\Throwable $e) {
-            die(
-                '<pre>' .
-                get_class($e) . "\n\n" .
-                $e->getMessage() . "\n\n" .
-                $e->getTraceAsString() .
-                '</pre>'
-            );
-        }
     }
 
     public function configureFields(string $pageName): iterable

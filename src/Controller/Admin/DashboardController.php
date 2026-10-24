@@ -8,13 +8,11 @@ use App\Entity\Appointment;
 use App\Entity\Barber;
 use App\Entity\Service;
 use App\Repository\AppointmentRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
@@ -36,26 +34,6 @@ class DashboardController extends AbstractDashboardController
             'cancelled' => $cancelled,
             'upcoming'  => array_slice($upcoming, 0, 10),
         ]);
-    }
-
-    #[Route('/test-update', name: 'test_update')]
-    public function testUpdate(EntityManagerInterface $em): Response
-    {
-        try {
-            $service = $em->getRepository(Service::class)->find(1);
-
-            $service->setName('TEST ' . time());
-
-            $em->flush();
-
-            return new Response('OK');
-        } catch (\Throwable $e) {
-            return new Response(
-                get_class($e) . "\n\n" .
-                $e->getMessage() . "\n\n" .
-                $e->getTraceAsString()
-            );
-        }
     }
 
     public function configureDashboard(): Dashboard
