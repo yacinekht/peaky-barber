@@ -9,21 +9,45 @@ use App\Form\AppointmentType;
 use App\Repository\AppointmentRepository;
 use App\Repository\BarberRepository;
 use App\Repository\ServiceRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class BookingController extends AbstractController
 {
+    private const DEFAULT_FROM = 'peakybarberkhaled@gmail.com';
+
     public function __construct(
         private AppointmentRepository $appointmentRepository,
         private BarberRepository $barberRepository,
         private ServiceRepository $serviceRepository,
+        private LoggerInterface $logger,
+        #[Autowire(env: 'default::MAIL_FROM')] private ?string $mailFrom = null,
+        #[Autowire(env: 'default::SALON_EMAIL')] private ?string $salonEmail = null,
     ) {}
+
+    /**
+     * Adresses qui reçoivent le récapitulatif.
+     * SALON_EMAIL peut contenir plusieurs adresses séparées par des virgules.
+     * Sans SALON_EMAIL, le récap part sur l'adresse d'expédition.
+     */
+    private function salonRecipients(): array
+    {
+        $raw = $this->salonEmail ?: ($this->mailFrom ?: self::DEFAULT_FROM);
+        $list = array_filter(array_map('trim', explode(',', $raw)));
+
+        return array_values(array_filter(
+            $list,
+            fn (string $address) => filter_var($address, FILTER_VALIDATE_EMAIL) !== false
+        ));
+    }
 
     #[Route('/', name: 'home')]
     public function home(): Response
@@ -45,21 +69,65 @@ class BookingController extends AbstractController
             $appointment->setStatus('confirmed');
             $this->appointmentRepository->save($appointment);
 
-            // Envoi email de confirmation
+            $from = new Address($this->mailFrom ?: self::DEFAULT_FROM, 'Peaky Barber');
+            $recipients = $this->salonRecipients();
+            $emailSent = false;
+
+            // 1. Email de confirmation au client
             try {
                 $email = (new Email())
-                    ->from('peakybarberkhaled@gmail.com')
+                    ->from($from)
                     ->to($appointment->getClientEmail())
                     ->subject('Confirmation de votre réservation — Peaky Barber')
                     ->html($this->renderView('email/confirmation.html.twig', [
                         'appointment' => $appointment,
                     ]));
+                if ($recipients) {
+                    $email->replyTo($recipients[0]);
+                }
                 $mailer->send($email);
-            } catch (\Exception $e) {
-                // Ne pas bloquer si l'email échoue
+                $emailSent = true;
+            } catch (\Throwable $e) {
+                $this->logger->error('Email de confirmation non envoyé : ' . $e->getMessage());
             }
 
-            $this->addFlash('success', 'Votre réservation a bien été enregistrée ! Un email de confirmation vous a été envoyé.');
+            // 2. Récapitulatif pour le salon / les employés
+            if ($recipients) {
+                try {
+                    $notif = (new Email())
+                        ->from($from)
+                        ->to(...$recipients)
+                        ->replyTo($appointment->getClientEmail())
+                        ->subject(sprintf(
+                            'Nouvelle réservation — %s, %s à %s',
+                            $appointment->getClientName(),
+                            $appointment->getAppointmentAt()->format('d/m/Y'),
+                            $appointment->getAppointmentAt()->format('H:i')
+                        ))
+                        ->text(sprintf(
+                            "Nouvelle réservation n°%d\n\nDate : %s à %s\nCoiffeur : %s\nPrestation : %s\nClient : %s\nEmail : %s\nTéléphone : %s\n",
+                            $appointment->getId(),
+                            $appointment->getAppointmentAt()->format('d/m/Y'),
+                            $appointment->getAppointmentAt()->format('H:i'),
+                            $appointment->getBarber()->getName(),
+                            $appointment->getService()->getName(),
+                            $appointment->getClientName(),
+                            $appointment->getClientEmail(),
+                            $appointment->getClientPhone() ?: 'non renseigné'
+                        ))
+                        ->html($this->renderView('email/salon_notification.html.twig', [
+                            'appointment' => $appointment,
+                        ]));
+                    $mailer->send($notif);
+                } catch (\Throwable $e) {
+                    $this->logger->error('Récapitulatif salon non envoyé : ' . $e->getMessage());
+                }
+            }
+
+            $this->addFlash('success', $emailSent
+                ? 'Votre réservation a bien été enregistrée ! Un email de confirmation vous a été envoyé.'
+                : 'Votre réservation a bien été enregistrée !');
+
             return $this->redirectToRoute('booking_success', ['id' => $appointment->getId()]);
         }
 
