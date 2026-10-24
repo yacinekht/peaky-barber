@@ -32,7 +32,7 @@ class AppFixtures extends Fixture
             $serviceEntities[] = $s;
         }
 
-        // ── Barbers ───────────────────────────────────────────────
+        // ── barbers ───────────────────────────────────────────────
         $barbers = [
             ['Arthur Shelby', 'Maître barbier depuis 12 ans. Spécialiste du rasage traditionnel et des coupes vintage.',  'Rasage Traditionnel'],
             ['Tommy Blade',   'Expert en dégradés et coiffures modernes. Formé à Londres et Milan.',                       'Dégradé & Styling'],
