@@ -1,3 +1,6 @@
+parameters:
+    env(TRUSTED_PROXIES): 'REMOTE_ADDR'
+
 framework:
     secret: '%env(APP_SECRET)%'
     http_method_override: true
